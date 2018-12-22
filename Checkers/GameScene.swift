@@ -12,27 +12,27 @@ import GameplayKit
 
 class GameScene: SKScene {
     
-    var strategist: GKStrategist!
-    var gameModel: Board { return strategist.gameModel as! Board }
+    var strategist: GKStrategist!    // The starategy to choose
+    var gameModel: Board { return strategist.gameModel as! Board }  // Model to play with for AI
     
-    var board: SKNode!
+    var board: SKNode!               // The board
     var label: SKLabelNode!
     var newLabel: SKLabelNode!
-    var whiteLabel: SKLabelNode!
-    var blackLabel: SKLabelNode!
-    var pieces: [SKNode?] = Array(repeating: nil, count: 64)
+    var whiteLabel: SKLabelNode!     // Lable for player 1
+    var blackLabel: SKLabelNode!     // Lable for player 2
+    var pieces: [SKNode?] = Array(repeating: nil, count: 64)  // Add 64 pieces for all possible locations intialized with null to avoid implicit call
     
-    func isValidIndex(index i: Int) -> Bool {
+    func isValidIndex(index i: Int) -> Bool {                 // Function to check the index
         return (i >> 3) & 1 == i & 1
     }
     
-    func locationForIndex(index i: Int) -> CGPoint {
+    func locationForIndex(index i: Int) -> CGPoint {          // Get the location of desierd index to detect touches
         let x = check * CGFloat((i % 8) - 4) + check / 2
         let y = check * CGFloat((i / 8) - 4) + check / 2
         return CGPoint(x: x, y: y)
     }
     
-    func indexForLocation(location l: CGPoint) -> Int? {
+    func indexForLocation(location l: CGPoint) -> Int? {    // Get the location of desierd index to detect touches
         guard abs(l.x) < (side / 2) && abs(l.y) < (side / 2) else { return nil }
         
         let i = l.x / check + 4
@@ -44,30 +44,29 @@ class GameScene: SKScene {
         return pos
     }
     
-    var side: CGFloat { return min(size.width, size.height) * 0.8 }
-    var check: CGFloat { return side / 8}
-    var radius: CGFloat { return check * 0.4 }
+    var side: CGFloat { return min(size.width, size.height) * 0.9 }       // side of square
+    var check: CGFloat { return side / 8}                                 // checkers pices
+    var radius: CGFloat { return check * 0.4 }                            //raduis
     
-    override func didChangeSize(_ oldSize: CGSize) {
-        board?.position = CGPoint(x: frame.midX, y: frame.midY)
+    override func didChangeSize(_ oldSize: CGSize) {                     //
+        board?.position = CGPoint(x: frame.midX, y: frame.midY)          // the new size assigned to board position
     }
     
     override func didMove(to view: SKView) {
-        strategist = GKMonteCarloStrategist()
-        //        (strategist as? GKMinmaxStrategist)?.maxLookAheadDepth = 4
-        //        strategist = GKMinmaxStrategist()
-        strategist.randomSource = GKLinearCongruentialRandomSource()
-        strategist.gameModel = Board(BitBoard())
+        strategist = GKMonteCarloStrategist()                          // Chose Monte carlo stratgey
+       
+        strategist.randomSource = GKLinearCongruentialRandomSource()  //  value To generate basic random values with this random source,
+        strategist.gameModel = Board(BitBoard())                 
         
-        board = SKShapeNode(rectOf: CGSize(width: side, height: side))
-        board.name = "board"
-        board.position = CGPoint(x: frame.midX, y: frame.midY)
-        addChild(board)
+        board = SKShapeNode(rectOf: CGSize(width: side, height: side))  //Creates a shape node with a rectangular path centered on the node’s origin.
+        board.name = "board"                                           // Assign a name
+        board.position = CGPoint(x: frame.midX, y: frame.midY)         //The position of the node in its parent's coordinate system.
+        addChild(board)                                                // Add child
         
-        let fontSize = side / 32
+        let fontSize = side / 32                                       // font size
         let offset = CGPoint(x: side / 2, y: side / 2 + fontSize * 1.5)
         
-        label = SKLabelNode(text: "Checkers!")
+        label = SKLabelNode(text: "Checkers!")                         // Checkers lable
         label.verticalAlignmentMode = .baseline
         label.horizontalAlignmentMode = .right
         label.fontSize = fontSize
@@ -76,7 +75,7 @@ class GameScene: SKScene {
         label.position = CGPoint(x: offset.x, y: -offset.y)
         board.addChild(label)
         
-        newLabel = SKLabelNode(text: "New Game")
+        newLabel = SKLabelNode(text: "New Game")      // New game lable
         newLabel.verticalAlignmentMode = .baseline
         newLabel.horizontalAlignmentMode = .left
         newLabel.fontSize = fontSize
@@ -85,7 +84,7 @@ class GameScene: SKScene {
         newLabel.position = CGPoint(x: -offset.x, y: offset.y - fontSize)
         board.addChild(newLabel)
         
-        whiteLabel = SKLabelNode(text: "\(Player.White)")
+        whiteLabel = SKLabelNode(text: "\(Player.White)")    // Player 1 lable properties
         whiteLabel.verticalAlignmentMode = .baseline
         whiteLabel.horizontalAlignmentMode = .left
         whiteLabel.fontSize = fontSize
@@ -94,7 +93,7 @@ class GameScene: SKScene {
         whiteLabel.position = CGPoint(x: -offset.x, y: -offset.y)
         board.addChild(whiteLabel)
         
-        blackLabel = SKLabelNode(text: "\(Player.Black)")
+        blackLabel = SKLabelNode(text: "\(Player.Black)")  // Player 2 lable properties
         blackLabel.verticalAlignmentMode = .baseline
         blackLabel.horizontalAlignmentMode = .right
         blackLabel.fontSize = fontSize
@@ -106,14 +105,14 @@ class GameScene: SKScene {
         for i in 0..<64 {
             let position = locationForIndex(index: i)
             
-            let square = SKShapeNode(rectOf: CGSize(width: check, height: check))
-            let gray = isValidIndex(index: i)
-            square.fillColor = gray ? .clear : .gray
-            square.position = position
-            square.name = "square"
+            let square = SKShapeNode(rectOf: CGSize(width: check, height: check))   // Square shape of cell intializer
+            let gray = isValidIndex(index: i)   //assign gray var for not vaild celles
+            square.fillColor = gray ? .clear : .gray   // if not true assign the gray colure
+            square.position = position                 // The position of the node in its parent's coordinate system.
+            square.name = "square"                     // Assign a name
             board.addChild(square)
             
-            if isValidIndex(index: i) {
+            if isValidIndex(index: i) {              // Add a lable with number for each movment cell
                 let label = SKLabelNode(text: "\(i >> 1)")
                 label.fontSize = radius * 0.8
                 label.fontColor = .yellow
@@ -126,42 +125,43 @@ class GameScene: SKScene {
             }
         }
         
-        resetBoard()
+        resetBoard()             // Reset the board after movment
     }
     
-    func resetBoard() {
-        board.enumerateChildNodes(withName: "piece", using: { (node, nil) in
-            node.removeFromParent()
+    func resetBoard() {          // Function to reset board
+        board.enumerateChildNodes(withName: "piece", using: { (node, nil) in          //This method enumerates the child array in order, searching
+            node.removeFromParent()                                                   //for nodes whose names match the search parameter.
         })
         
-        pieces = Array(repeating: nil, count: 64)
+        pieces = Array(repeating: nil, count: 64)                                     // Re-intialize the array of pieces
         
-        for index in gameModel.checkSet() {
-            let color: SKColor = gameModel.isWhite(index) ? .red : .blue
-            let piece = SKShapeNode(circleOfRadius: radius)
-            let inner = SKShapeNode(circleOfRadius: radius * 0.8)
+        for index in gameModel.checkSet() {                                           // Return all the previous pieces
+            let color: SKColor = gameModel.isWhite(index) ? .red : .blue              // Assign there colures to the inner circles
+            let piece = SKShapeNode(circleOfRadius: radius)                           // Piece creation
+            let inner = SKShapeNode(circleOfRadius: radius * 0.8)                     // Inner circle creation
             inner.fillColor = color
-            piece.addChild(inner)
+            piece.addChild(inner)                                                     // Add a child to the parent node
             piece.position = self.locationForIndex(index: index)
             piece.name = "piece"
-            piece.fillColor = gameModel.isQueen(index) ? .yellow : color
+            piece.fillColor = gameModel.isQueen(index) ? .yellow : color // If the piece turned to be a queen add yellow tag
             piece.zPosition = 2
             
-            pieces[index] = piece
+            pieces[index] = piece                                        // Add the piece to the array
             
-            board.addChild(piece)
+            board.addChild(piece)                                        // Add piece as a child to the board
         }
         
-        nextTurn()
+        nextTurn()                                                       // Call next turn
     }
     
-    var moving: SKNode?
-    var fromPosition: CGPoint?
+    var moving: SKNode?                              // Variable to detect moving
+    var fromPosition: CGPoint?                       // The index  of touch
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            if whiteLabel.contains(touch.location(in: board)) {
-                Player.White.isComputer = !Player.White.isComputer
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)     // Function to call when the board is touched
+    {
+        for touch in touches {             
+            if whiteLabel.contains(touch.location(in: board)) {                   // If the white lable is touched
+                Player.White.isComputer = !Player.White.isComputer                // Change the player1 mode
                 whiteLabel.text = "\(Player.White)"
                 if let activePlayer = gameModel.activePlayer as? Player, activePlayer == Player.White {
                     nextTurn()
@@ -169,8 +169,8 @@ class GameScene: SKScene {
                 return
             }
             
-            if blackLabel.contains(touch.location(in: board)) {
-                Player.Black.isComputer = !Player.Black.isComputer
+            if blackLabel.contains(touch.location(in: board)) {                  //if the black lable is touhed
+                Player.Black.isComputer = !Player.Black.isComputer               //change the player2 mode
                 blackLabel.text = "\(Player.Black)"
                 if let activePlayer = gameModel.activePlayer as? Player, activePlayer == Player.Black {
                     nextTurn()

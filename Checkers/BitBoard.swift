@@ -13,9 +13,9 @@ public struct BitBoard {
     public typealias MaskIndex = Int
     public typealias CheckIndex = Int
     
-    let white: Mask
-    let black: Mask
-    let queen: Mask
+    let white: Mask                // Mask for white pieces
+    let black: Mask                // Mask for black pieces
+    let queen: Mask                // Mask for queen
     
     let player: Bool
     let range: Range<Int>
@@ -63,7 +63,7 @@ extension BitBoard.Mask {
     }
 }
 
-extension BitBoard.MaskIndex {
+extension BitBoard.MaskIndex {             
     public init(checkIndex: BitBoard.CheckIndex) {
         self = checkIndex >> 1
     }
@@ -105,7 +105,7 @@ extension BitBoard: CustomStringConvertible {
 
 extension BitBoard: Sequence {
     
-    static let allMovements = 0..<256
+    static let allMovements = 0..<256              // All movment allowed
     
     var isContinuation: Bool { return range != BitBoard.allMovements }
     
@@ -149,7 +149,7 @@ extension BitBoard: Sequence {
             // 0..127 - capture, 128..257 - move
             while i < self.range.endIndex {
                 let idx = (i >> 2) & 31   // the mask index
-                let dir = i & 3           // one ofthe four directions
+                let dir = i & 3           // one of the four directions
                 let this = Mask(1 << idx) // the current piece
                 let cap = i < 128         // capturing or moving
                 i += 1
@@ -190,7 +190,7 @@ extension BitBoard: Sequence {
                     // check for empty check
                     guard mask2 & empty != 0 else { continue }
                     
-                    hasCaptured = true
+                    hasCaptured = true       // The captured is true
                     playerXor = mask2
                     opponentXor = mask1
                     
